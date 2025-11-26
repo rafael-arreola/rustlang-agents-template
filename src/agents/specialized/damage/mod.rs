@@ -30,7 +30,9 @@ impl<M: CompletionModel + Clone + Send + Sync + 'static> DamageSpecialist<M> {
             .tool(CostDatabase)
             .build();
 
-        Self { agent: Arc::new(agent) }
+        Self {
+            agent: Arc::new(agent),
+        }
     }
 }
 
@@ -44,7 +46,9 @@ impl<M: CompletionModel + Clone + Send + Sync + 'static> Tool for DamageSpeciali
     async fn definition(&self, _prompt: String) -> rig::completion::ToolDefinition {
         rig::completion::ToolDefinition {
             name: Self::NAME.to_string(),
-            description: "Usa este agente cuando el usuario reporte un artículo dañado, roto o defectuoso.".to_string(),
+            description:
+                "Usa este agente cuando el usuario reporte un artículo dañado, roto o defectuoso."
+                    .to_string(),
             parameters: serde_json::to_value(schemars::schema_for!(DamageReportArgs))
                 .expect("Failed to serialize schema"),
         }
@@ -58,13 +62,10 @@ impl<M: CompletionModel + Clone + Send + Sync + 'static> Tool for DamageSpeciali
 
         let agent = self.agent.clone();
 
-        let response = tokio::spawn(async move {
-            agent.prompt(&prompt).await
-        })
-        .await
-        .map_err(|e| ToolError(format!("Task join error: {}", e)))?
-        .map_err(|e| ToolError(format!("Agent execution error: {}", e)))?;
-        
+        let response = tokio::spawn(async move { agent.prompt(&prompt).await })
+            .await
+            .map_err(|e| ToolError(format!("Agent execution error: {}", e)))?;
+
         Ok(response)
     }
 }

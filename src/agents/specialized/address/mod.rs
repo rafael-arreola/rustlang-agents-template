@@ -69,7 +69,6 @@ impl<M: CompletionModel + Clone + Send + Sync + 'static> Tool for AddressSpecial
         // and to handle the async call cleanly.
         let response = tokio::spawn(async move { agent.prompt(&prompt).await })
             .await
-            .map_err(|e| ToolError(format!("Task join error: {}", e)))?
             .map_err(|e| ToolError(format!("Agent execution error: {}", e)))?;
 
         Ok(response)
