@@ -5,6 +5,7 @@ use rig::{
     tool::Tool,
 };
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 // ================================================================
 // 1. Definición de Argumentos (Input/Output)
@@ -32,8 +33,9 @@ pub struct DummyOutput {
 pub struct DummyError;
 
 /// El struct principal que envuelve al Agente.
+#[derive(Clone)]
 pub struct DummySpecialist<M: CompletionModel + Clone + Send + Sync + 'static> {
-    agent: Agent<M>,
+    agent: Arc<Agent<M>>,
 }
 
 impl<M: CompletionModel + Clone + Send + Sync + 'static> DummySpecialist<M> {
@@ -44,7 +46,9 @@ impl<M: CompletionModel + Clone + Send + Sync + 'static> DummySpecialist<M> {
             .tool(TextReverser)
             .build();
 
-        Self { agent }
+        Self {
+            agent: Arc::new(agent),
+        }
     }
 }
 
